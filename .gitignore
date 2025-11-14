@@ -65,3 +65,8 @@ bookings.json
 *.db-journal
 *.db-shm
 *.db-wal
+
+# Debug and archive directories
+debug_scripts/
+archive/
+tests/old/

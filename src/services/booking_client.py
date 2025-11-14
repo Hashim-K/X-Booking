@@ -1,21 +1,42 @@
 """
 X Booking System Client
 Handles direct interaction with the TU Delft X booking system.
+
+NOTE: The X booking system uses OIDC/SSO authentication which is complex for direct HTTP requests.
+This client is designed to work with Selenium WebDriver sessions that have already authenticated.
+For a standalone test, use the Selenium-based main.py instead.
 """
 import requests
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 import logging
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 logger = logging.getLogger(__name__)
 
 
 class BookingClient:
-    """Client for interacting with TU Delft X booking system"""
+    """
+    Client for interacting with TU Delft X booking system.
+    
+    Can work in two modes:
+    1. With a Selenium WebDriver (recommended for authentication)
+    2. With requests Session (if you have valid cookies)
+    """
     
     BASE_URL = "https://x.tudelft.nl"
     
-    def __init__(self):
+    def __init__(self, driver: Optional[webdriver.Chrome] = None):
+        """
+        Initialize the booking client.
+        
+        Args:
+            driver: Optional Selenium WebDriver instance (already authenticated)
+        """
+        self.driver = driver
         self.session = requests.Session()
         self.session.headers.update({
             'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -24,69 +45,128 @@ class BookingClient:
         })
         self.is_authenticated = False
         self.current_account = None
+        
+        # If driver provided, copy cookies to requests session
+        if self.driver:
+            self._sync_cookies_from_driver()
 
-    def login(self, username: str, password: str) -> Dict[str, Any]:
+    def _sync_cookies_from_driver(self):
+        """Copy cookies from Selenium driver to requests session"""
+        if not self.driver:
+            return
+        
+        try:
+            for cookie in self.driver.get_cookies():
+                self.session.cookies.set(cookie['name'], cookie['value'], domain=cookie.get('domain'))
+            self.is_authenticated = True
+            logger.info("Synced cookies from Selenium driver")
+        except Exception as e:
+            logger.error("Failed to sync cookies: %s", str(e))
+
+    def login_with_selenium(self, username: str, password: str) -> Dict[str, Any]:
         """
-        Login to X booking system with account credentials.
+        Login using Selenium WebDriver (handles OIDC/SSO flow).
+        This is the recommended way to authenticate with X booking system.
         
         Args:
-            username: Account username/email
+            username: TU Delft NetID
             password: Account password
             
         Returns:
             Dict with success status and user info or error message
         """
+        if not self.driver:
+            return {
+                "success": False,
+                "error": "Selenium driver not initialized. Create client with: BookingClient(driver)"
+            }
+        
         try:
-            logger.info(f"Attempting login for user: {username}")
+            logger.info("Attempting login for user: %s", username)
             
-            # Step 1: Get login page to obtain CSRF token
-            login_page = self.session.get(f"{self.BASE_URL}/login")
+            # Navigate to X booking system
+            self.driver.get(f"{self.BASE_URL}/dashboard")
+            wait = WebDriverWait(self.driver, 10)
             
-            if login_page.status_code != 200:
-                return {
-                    "success": False,
-                    "error": f"Failed to access login page: {login_page.status_code}"
-                }
+            # Check if already logged in
+            current_url = self.driver.current_url
+            if '/pages/login' not in current_url:
+                try:
+                    # Look for dashboard elements
+                    self.driver.find_element(By.CSS_SELECTOR, "participations-table")
+                    logger.info("Already authenticated")
+                    self.is_authenticated = True
+                    self._sync_cookies_from_driver()
+                    return {
+                        "success": True,
+                        "user": {"username": username},
+                        "message": "Already authenticated"
+                    }
+                except:
+                    pass
             
-            # Step 2: Submit login credentials
-            login_data = {
-                "username": username,
-                "password": password,
+            # Click TU Delft login button
+            tu_button = wait.until(EC.element_to_be_clickable(
+                (By.CSS_SELECTOR, "button[data-test-id='oidc-login-button']")))
+            tu_button.click()
+            
+            # Select TU Delft account
+            tu_account = wait.until(EC.element_to_be_clickable(
+                (By.CSS_SELECTOR, "div[data-title='Delft University of Technology']")))
+            tu_account.click()
+            
+            # Enter credentials
+            username_field = wait.until(EC.presence_of_element_located((By.ID, 'username')))
+            password_field = self.driver.find_element(By.ID, 'password')
+            
+            username_field.send_keys(username)
+            password_field.send_keys(password)
+            
+            # Click login
+            login_button = self.driver.find_element(By.ID, 'submit_button')
+            login_button.click()
+            
+            # Wait for redirect
+            wait.until(lambda d: 'x.tudelft.nl' in d.current_url and '/pages/login' not in d.current_url)
+            
+            # Sync cookies and mark as authenticated
+            self._sync_cookies_from_driver()
+            self.current_account = {"username": username}
+            
+            logger.info("Login successful for user: %s", username)
+            return {
+                "success": True,
+                "user": self.current_account,
+                "message": "Login successful"
             }
             
-            response = self.session.post(
-                f"{self.BASE_URL}/api/auth/login",
-                json=login_data,
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                self.is_authenticated = True
-                self.current_account = {
-                    "username": username,
-                    "user_id": data.get("userId"),
-                    "name": data.get("name"),
-                }
-                
-                logger.info(f"Login successful for user: {username}")
-                return {
-                    "success": True,
-                    "user": self.current_account,
-                    "message": "Login successful"
-                }
-            else:
-                error_data = response.json() if response.headers.get('content-type') == 'application/json' else {}
-                logger.error(f"Login failed for user {username}: {response.status_code}")
-                return {
-                    "success": False,
-                    "error": error_data.get("message", "Invalid credentials")
-                }
-                
         except Exception as e:
-            logger.error(f"Login error for user {username}: {str(e)}")
+            logger.error("Login error for user %s: %s", username, str(e))
             return {
                 "success": False,
                 "error": f"Login failed: {str(e)}"
+            }
+
+    def login(self, username: str, password: str) -> Dict[str, Any]:
+        """
+        Login to X booking system.
+        
+        If Selenium driver is available, uses OIDC/SSO flow.
+        Otherwise, returns error (direct HTTP auth not supported for OIDC).
+        
+        Args:
+            username: Account username/NetID
+            password: Account password
+            
+        Returns:
+            Dict with success status and user info or error message
+        """
+        if self.driver:
+            return self.login_with_selenium(username, password)
+        else:
+            return {
+                "success": False,
+                "error": "Direct HTTP login not supported. Use Selenium driver or provide authenticated session."
             }
 
     def logout(self) -> bool:
