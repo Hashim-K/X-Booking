@@ -137,12 +137,14 @@
 
 ### 5.3: Slot Monitor Service
 
-- [ ] Create `src/services/slot_monitor.py`
-- [ ] Implement slot scraping from TU Delft website
-- [ ] Add caching layer (30-60 second TTL)
-- [ ] Create SSE endpoint for real-time updates
-- [ ] Background polling task with configurable interval
-- [ ] **COMMIT**: `feat: add live slot monitoring service`
+- [x] Create `src/services/slot_monitor.py`
+- [x] Implement slot scraping from TU Delft website
+- [x] Add caching layer (30-60 second TTL)
+- [x] Create SSE endpoint for real-time updates (`/api/slots/monitor`)
+- [x] Add background polling with threading
+- [x] Create Next.js API routes for slot operations
+- [x] Build SlotGrid component for UI
+- [x] **COMMIT**: `feat: add live slot monitoring service`
 
 ### 5.4: Account Management API
 
