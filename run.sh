@@ -3,50 +3,43 @@
 # Enable error handling
 set -e
 
-# Default environment name
-DEFAULT_ENV="xscript"
+echo "X-Booking Development Environment Setup"
+echo "========================================"
 
-# Use the provided environment name or the default
-if [ -z "$1" ]; then
-    ENV_NAME="$DEFAULT_ENV"
-else
-    ENV_NAME="$1"
+# Check if Poetry is installed
+if ! command -v poetry &> /dev/null; then
+    echo "Error: Poetry is not installed."
+    echo "Please install Poetry: https://python-poetry.org/docs/#installation"
+    exit 1
 fi
 
-echo "Checking conda environment: $ENV_NAME"
+echo "✓ Poetry found"
 
-# Function to find conda
-find_conda() {
-    # Try to find conda in PATH
-    if command -v conda &> /dev/null; then
-        echo "Found conda in PATH"
-        return 0
-    fi
+# Check if npm is installed
+if ! command -v npm &> /dev/null; then
+    echo "Error: npm is not installed."
+    echo "Please install Node.js and npm: https://nodejs.org/"
+    exit 1
+fi
 
-    # Try common conda installation paths on Mac
-    local common_paths=(
-        "$HOME/miniconda3/bin/conda"
-        "$HOME/anaconda3/bin/conda"
-        "$HOME/opt/miniconda3/bin/conda"
-        "$HOME/opt/anaconda3/bin/conda"
-        "/opt/miniconda3/bin/conda"
-        "/opt/anaconda3/bin/conda"
-    )
+echo "✓ npm found"
 
-    for path in "${common_paths[@]}"; do
-        if [ -f "$path" ]; then
-            echo "Found conda at $path"
-            export PATH="$(dirname "$path"):$PATH"
-            return 0
-        fi
-    done
+# Install Python dependencies
+echo ""
+echo "Installing Python dependencies with Poetry..."
+poetry install
 
-    echo "Could not find conda. Please make sure conda is installed and properly configured."
-    return 1
-}
+# Install Node.js dependencies
+echo ""
+echo "Installing Node.js dependencies with npm..."
+npm install
 
-# Find conda
-find_conda || exit 1
+# Start the development server
+echo ""
+echo "Starting development server..."
+echo "Press Ctrl+C to stop"
+echo ""
+npm run dev
 
 # Check if environment exists
 if ! conda env list | grep -q "^$ENV_NAME "; then

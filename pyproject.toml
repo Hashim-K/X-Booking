@@ -1,0 +1,23 @@
+[project]
+name = "x-booking"
+version = "0.1.0"
+description = "Automated fitness slot booking system for TU Delft X facilities"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "python-dotenv>=1.0.0",
+    "selenium>=4.6.0",
+    "numpy>=1.26.0",
+    "tkcalendar>=1.6.0"
+]
+
+[[project.authors]]
+name = "Hashim Karim"
+email = "hashimkarim168@gmail.com"
+
+[tool.poetry]
+package-mode = false
+
+[build-system]
+requires = ["poetry-core>=2.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -42,3 +42,17 @@ next-env.d.ts
 
 # env
 .env
+
+# Python
+.venv
+__pycache__/
+*.py[cod]
+*$py.class
+poetry.lock
+
+# Bun
+bun.lockb
+
+# Debug files
+booking_error_*.png
+booking_error_*.html
