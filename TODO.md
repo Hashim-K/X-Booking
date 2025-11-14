@@ -26,15 +26,15 @@
 
 ### 2.1: Replace react-beautiful-dnd with @dnd-kit
 
-- [ ] Install @dnd-kit packages: `bun add @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities`
-- [ ] Remove react-beautiful-dnd: `bun remove react-beautiful-dnd`
-- [ ] Rewrite TimeSelector.tsx to use @dnd-kit API
-  - [ ] Replace DragDropContext with DndContext
-  - [ ] Replace Droppable with SortableContext
-  - [ ] Replace Draggable with useSortable
-  - [ ] Update state management with arrayMove
-- [ ] Test drag-and-drop functionality in browser
-- [ ] **COMMIT**: `feat: replace react-beautiful-dnd with @dnd-kit for React 19 compatibility`
+- [x] Install @dnd-kit packages: `bun add @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities`
+- [x] Remove react-beautiful-dnd: `bun remove react-beautiful-dnd`
+- [x] Rewrite TimeSelector.tsx to use @dnd-kit API
+  - [x] Replace DragDropContext with DndContext
+  - [x] Replace Droppable with SortableContext
+  - [x] Replace Draggable with useSortable
+  - [x] Update state management with arrayMove
+- [x] Test drag-and-drop functionality in browser
+- [x] **COMMIT**: `feat: replace react-beautiful-dnd with @dnd-kit for React 19 compatibility`
 
 ## Phase 3: Selenium & Browser Detection
 
@@ -190,6 +190,6 @@
 
 ## Current Status
 
-**Phase**: 1.2 - Migrate from npm to Bun (COMPLETE)  
-**Last Commit**: Ready to commit Phase 1.2  
-**Next Step**: Commit Phase 1.2, then start Phase 2.1 (replace react-beautiful-dnd)
+**Phase**: 2.1 - Replace react-beautiful-dnd with @dnd-kit (COMPLETE)  
+**Last Commit**: Ready to commit Phase 2.1  
+**Next Step**: Commit Phase 2.1, then start Phase 3.1 (Selenium driver management)

@@ -1,11 +1,59 @@
 'use client';
 
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { DropResult } from 'react-beautiful-dnd';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface TimeSelectorProps {
   selectedTimes: string[];
   onTimesChange: (times: string[]) => void;
+}
+
+interface SortableItemProps {
+  id: string;
+  index: number;
+}
+
+function SortableItem({ id, index }: SortableItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className="bg-gray-100 p-3 rounded-md flex items-center cursor-move"
+    >
+      <span className="mr-2">☰</span>
+      {index + 1}. {id}
+    </div>
+  );
 }
 
 export default function TimeSelector({ selectedTimes, onTimesChange }: TimeSelectorProps) {
@@ -15,6 +63,13 @@ export default function TimeSelector({ selectedTimes, onTimesChange }: TimeSelec
     "19:00", "20:00", "21:00", "22:00", "23:00"
   ];
 
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   const handleTimeToggle = (time: string) => {
     if (selectedTimes.includes(time)) {
       onTimesChange(selectedTimes.filter(t => t !== time));
@@ -23,14 +78,15 @@ export default function TimeSelector({ selectedTimes, onTimesChange }: TimeSelec
     }
   };
 
-  const handleDragEnd = (result: DropResult) => {
-    if (!result.destination) return;
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
 
-    const items = Array.from(selectedTimes);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
+    if (over && active.id !== over.id) {
+      const oldIndex = selectedTimes.indexOf(active.id as string);
+      const newIndex = selectedTimes.indexOf(over.id as string);
 
-    onTimesChange(items);
+      onTimesChange(arrayMove(selectedTimes, oldIndex, newIndex));
+    }
   };
 
   return (
@@ -60,34 +116,22 @@ export default function TimeSelector({ selectedTimes, onTimesChange }: TimeSelec
           <h3 className="text-lg font-medium text-gray-900 mb-3">
             Priority Order
           </h3>
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <Droppable droppableId="times">
-              {(provided) => (
-                <div
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                  className="space-y-2"
-                >
-                  {selectedTimes.map((time, index) => (
-                    <Draggable key={time} draggableId={time} index={index}>
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className="bg-gray-100 p-3 rounded-md flex items-center"
-                        >
-                          <span className="mr-2">☰</span>
-                          {index + 1}. {time}
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={selectedTimes}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-2">
+                {selectedTimes.map((time, index) => (
+                  <SortableItem key={time} id={time} index={index} />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         </div>
       )}
     </div>
