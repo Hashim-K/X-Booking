@@ -120,7 +120,96 @@
 - [x] Add mode detection logic (single vs multi)
 - [x] **COMMIT**: `feat: add multi-booking configuration structure`
 
-### 5.2: Implement parallel booking with session management
+### 5.2: Database Layer with SQLite
+
+- [x] Add SQLAlchemy and Alembic to dependencies
+- [x] Create database schema with 5 tables:
+  - [x] `accounts` - Account credentials and status
+  - [x] `bookings` - Booking records with status tracking
+  - [x] `slot_availability` - Cached slot availability data
+  - [x] `snipe_jobs` - Scheduled booking attempts
+  - [x] `booking_log` - Audit trail
+- [x] Create `src/services/database.py` with DatabaseService class
+- [x] Implement all CRUD operations
+- [x] Add database files to .gitignore
+- [x] Write and test database functionality
+- [x] **COMMIT**: `feat: add SQLite database for booking state management`
+
+### 5.3: Slot Monitor Service
+
+- [ ] Create `src/services/slot_monitor.py`
+- [ ] Implement slot scraping from TU Delft website
+- [ ] Add caching layer (30-60 second TTL)
+- [ ] Create SSE endpoint for real-time updates
+- [ ] Background polling task with configurable interval
+- [ ] **COMMIT**: `feat: add live slot monitoring service`
+
+### 5.4: Account Management API
+
+- [ ] Create account CRUD endpoints in Next.js
+- [ ] Add account switcher component
+- [ ] Implement session management
+- [ ] Add account usage statistics
+- [ ] **COMMIT**: `feat: add account management API and UI`
+
+### 5.5: Booking Management
+
+- [ ] Create booking CRUD endpoints
+- [ ] Add booking history component
+- [ ] Implement cancel booking functionality
+- [ ] Add manual booking through UI
+- [ ] **COMMIT**: `feat: add booking management with cancel support`
+
+### 5.6: Scheduler & Auto-Snipe
+
+- [ ] Add APScheduler dependency
+- [ ] Create `src/services/scheduler.py`
+- [ ] Implement job scheduling for unlock times
+- [ ] Create snipe job API endpoints
+- [ ] Build snipe job configuration UI
+- [ ] **COMMIT**: `feat: add APScheduler for automated sniping`
+
+### 5.7: Sub-location Support (X1 A/B, X3 A/B)
+
+- [ ] Research ng-select dropdown interaction
+- [ ] Update login_x() to handle sub-locations
+- [ ] Add sub-location to UI components
+- [ ] Test all combinations
+- [ ] **COMMIT**: `feat: add X1/X3 sub-location support`
+
+### 5.8: Divide & Conquer Logic
+
+- [ ] Implement account assignment algorithm
+- [ ] Add priority-based execution
+- [ ] Create parallel booking coordinator
+- [ ] Add result aggregation
+- [ ] **COMMIT**: `feat: implement divide and conquer booking strategy`
+
+### 5.9: Live Dashboard
+
+- [ ] Create MonitorDashboard component
+- [ ] Add real-time slot grid
+- [ ] Show upcoming snipe jobs
+- [ ] Display booking statistics
+- [ ] **COMMIT**: `feat: add live monitoring dashboard`
+
+### 5.10: Testing & Polish
+
+- [ ] Test with 3 accounts
+- [ ] Test priority fallback logic
+- [ ] Test consecutive hour booking
+- [ ] Verify database integrity
+- [ ] Performance optimization
+- [ ] **COMMIT**: `test: comprehensive multi-booking validation`
+
+### 5.11: Merge to Main
+
+- [ ] Update main README.md
+- [ ] Create migration guide
+- [ ] Merge feat/multibooking → main
+- [ ] Tag release v2.0.0
+
+### OLD 5.2: Implement parallel booking with session management (SUPERSEDED BY NEW ARCHITECTURE)
 
 - [ ] Create separate Chrome user data directories per session
 - [ ] Add `--user-data-dir=/tmp/chrome_session_{netid}` to chrome_options

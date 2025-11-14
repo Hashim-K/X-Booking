@@ -59,3 +59,9 @@ booking_error_*.html
 
 # Multi-booking credentials (keep these secret!)
 bookings.json
+
+# Database files
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
