@@ -26,35 +26,65 @@ export default function Home() {
 
   const attemptBooking = async () => {
     try {
-      const response = await fetch('/api/book', {
+      // Check if account is selected
+      if (!selectedAccountId) {
+        setStatus('Please select an account first');
+        setIsBooking(false);
+        return false;
+      }
+
+      // Validate inputs
+      if (selectedTimes.length === 0) {
+        setStatus('Please select at least one time slot');
+        setIsBooking(false);
+        return false;
+      }
+
+      // Format date as YYYY-MM-DD
+      const formattedDate = selectedDate.toISOString().split('T')[0];
+
+      setStatus('Creating booking...');
+
+      const response = await fetch('/api/bookings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          date: selectedDate,
-          times: selectedTimes,
-          interval: retryInterval,
+          accountId: selectedAccountId,
+          date: formattedDate,
+          timeSlots: selectedTimes,
           location: location,
+          retryInterval: retryInterval,
+          autoRetry: false, // Manual booking for now
         }),
       });
 
-      if (response.ok) {
-        setStatus('Booking completed!');
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setStatus(`Booking created! ${data.bookings.length} slot(s) added to queue.`);
         setIsBooking(false);
         return true;
+      } else {
+        setStatus(`Error: ${data.error || 'Failed to create booking'}`);
+        setIsBooking(false);
+        return false;
       }
-      console.log(response);
-      return false;
     } catch (error) {
       setStatus(`Error: ${error}`);
       setIsBooking(false);
-      console.log(error);
+      console.error(error);
       return false;
     }
   };
 
   const handleStartBooking = async () => {
+    if (!selectedAccountId) {
+      setStatus('Please select an account from the Accounts tab');
+      return;
+    }
+
     if (selectedTimes.length === 0) {
       setStatus('Please select at least one time slot');
       return;
@@ -63,10 +93,7 @@ export default function Home() {
     setIsBooking(true);
     setStatus('Starting booking process...');
 
-    if (!(await attemptBooking())) {
-      setStatus(`No available slots, retrying in ${retryInterval} seconds...`);
-      retryTimeoutRef.current = setTimeout(handleStartBooking, retryInterval * 1000);
-    }
+    await attemptBooking();
   };
 
   const handleStopBooking = () => {
