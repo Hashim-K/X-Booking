@@ -4,6 +4,9 @@ from datetime import datetime
 import tkinter as tk
 from tkinter import ttk
 from tkcalendar import Calendar  # You'll need to add this to requirements.txt
+import subprocess
+import shutil
+import platform
 
 import numpy as np
 
@@ -17,6 +20,158 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 import argparse
 import sys
+
+
+def find_chrome_binary():
+    """
+    Detect the best available Chrome/Chromium browser across platforms.
+    Priority: Default browser → Brave → Chrome → Chromium → Flatpak browsers
+    
+    Returns:
+        str: Path to the browser binary, or None if not found
+    """
+    system = platform.system()
+    
+    # Linux
+    if system == "Linux":
+        # Try to get default browser first
+        try:
+            result = subprocess.run(
+                ["xdg-settings", "get", "default-web-browser"],
+                capture_output=True,
+                text=True,
+                timeout=2
+            )
+            if result.returncode == 0:
+                default_browser = result.stdout.strip().lower()
+                if "brave" in default_browser:
+                    brave_path = shutil.which("brave-browser") or shutil.which("brave")
+                    if brave_path:
+                        print(f"Using default browser: Brave ({brave_path})")
+                        return brave_path
+                elif "chrom" in default_browser:  # Matches both chrome and chromium
+                    chrome_path = shutil.which("google-chrome") or shutil.which("chromium")
+                    if chrome_path:
+                        print(f"Using default browser: Chrome/Chromium ({chrome_path})")
+                        return chrome_path
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            pass
+        
+        # Fallback chain for Linux
+        browsers = [
+            ("brave-browser", "Brave"),
+            ("brave", "Brave"),
+            ("google-chrome", "Google Chrome"),
+            ("chromium", "Chromium"),
+            ("chromium-browser", "Chromium"),
+        ]
+        
+        for binary, name in browsers:
+            path = shutil.which(binary)
+            if path:
+                print(f"Using {name} ({path})")
+                return path
+        
+        # Check Flatpak browsers
+        try:
+            result = subprocess.run(
+                ["flatpak", "list", "--app", "--columns=application"],
+                capture_output=True,
+                text=True,
+                timeout=2
+            )
+            if result.returncode == 0:
+                flatpak_browsers = {
+                    "com.brave.Browser": "Brave (Flatpak)",
+                    "com.google.Chrome": "Google Chrome (Flatpak)",
+                    "org.chromium.Chromium": "Chromium (Flatpak)",
+                }
+                for app_id, name in flatpak_browsers.items():
+                    if app_id in result.stdout:
+                        print(f"Using {name}")
+                        return f"flatpak run {app_id}"
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            pass
+    
+    # macOS
+    elif system == "Darwin":
+        # Try to get default browser
+        try:
+            result = subprocess.run(
+                ["defaults", "read", "com.apple.LaunchServices/com.apple.launchservices.secure", "LSHandlers"],
+                capture_output=True,
+                text=True,
+                timeout=2
+            )
+            if result.returncode == 0 and "brave" in result.stdout.lower():
+                brave_path = "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
+                if os.path.exists(brave_path):
+                    print(f"Using default browser: Brave ({brave_path})")
+                    return brave_path
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            pass
+        
+        # Fallback chain for macOS
+        browsers = [
+            ("/Applications/Brave Browser.app/Contents/MacOS/Brave Browser", "Brave"),
+            ("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "Google Chrome"),
+            ("/Applications/Chromium.app/Contents/MacOS/Chromium", "Chromium"),
+        ]
+        
+        for path, name in browsers:
+            if os.path.exists(path):
+                print(f"Using {name} ({path})")
+                return path
+    
+    # Windows
+    elif system == "Windows":
+        # Try to get default browser from registry
+        try:
+            import winreg
+            key = winreg.OpenKey(
+                winreg.HKEY_CURRENT_USER,
+                r"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice"
+            )
+            prog_id = winreg.QueryValueEx(key, "ProgId")[0]
+            winreg.CloseKey(key)
+            
+            if "Brave" in prog_id:
+                brave_paths = [
+                    os.path.expandvars(r"%ProgramFiles%\BraveSoftware\Brave-Browser\Application\brave.exe"),
+                    os.path.expandvars(r"%LocalAppData%\BraveSoftware\Brave-Browser\Application\brave.exe"),
+                ]
+                for path in brave_paths:
+                    if os.path.exists(path):
+                        print(f"Using default browser: Brave ({path})")
+                        return path
+            elif "Chrome" in prog_id:
+                chrome_paths = [
+                    os.path.expandvars(r"%ProgramFiles%\Google\Chrome\Application\chrome.exe"),
+                    os.path.expandvars(r"%LocalAppData%\Google\Chrome\Application\chrome.exe"),
+                ]
+                for path in chrome_paths:
+                    if os.path.exists(path):
+                        print(f"Using default browser: Chrome ({path})")
+                        return path
+        except (ImportError, OSError):
+            pass
+        
+        # Fallback chain for Windows
+        browsers = [
+            (r"%ProgramFiles%\BraveSoftware\Brave-Browser\Application\brave.exe", "Brave"),
+            (r"%LocalAppData%\BraveSoftware\Brave-Browser\Application\brave.exe", "Brave"),
+            (r"%ProgramFiles%\Google\Chrome\Application\chrome.exe", "Google Chrome"),
+            (r"%LocalAppData%\Google\Chrome\Application\chrome.exe", "Google Chrome"),
+        ]
+        
+        for path_template, name in browsers:
+            path = os.path.expandvars(path_template)
+            if os.path.exists(path):
+                print(f"Using {name} ({path})")
+                return path
+    
+    print("Warning: No Chrome/Chromium browser found. Selenium will try default ChromeDriver path.")
+    return None
 
 
 def login_x(target_date, desired_times, retry_interval):
@@ -38,6 +193,12 @@ def login_x(target_date, desired_times, retry_interval):
 
     # Initialize Chrome options
     chrome_options = Options()
+    
+    # Detect and set browser binary
+    browser_binary = find_chrome_binary()
+    if browser_binary:
+        chrome_options.binary_location = browser_binary
+    
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--remote-debugging-port=9222")

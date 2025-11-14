@@ -49,15 +49,15 @@
 
 ### 3.2: Implement smart browser detection
 
-- [ ] Add imports: subprocess, shutil to main.py
-- [ ] Create find_chrome_binary() function
-- [ ] Implement xdg-settings check for Linux default browser
-- [ ] Add fallback chain: Brave → Chrome → Chromium → Flatpak
-- [ ] Add macOS support: `defaults read com.apple.LaunchServices/com.apple.launchservices.secure LSHandlers`
-- [ ] Add Windows support: Registry check for default browser
-- [ ] Update chrome_options.binary_location to use detected browser
-- [ ] Test on Linux with Brave/Chrome
-- [ ] **COMMIT**: `feat: smart cross-platform browser detection with default browser priority`
+- [x] Add imports: subprocess, shutil to main.py
+- [x] Create find_chrome_binary() function
+- [x] Implement xdg-settings check for Linux default browser
+- [x] Add fallback chain: Brave → Chrome → Chromium → Flatpak
+- [x] Add macOS support: `defaults read com.apple.LaunchServices/com.apple.launchservices.secure LSHandlers`
+- [x] Add Windows support: Registry check for default browser
+- [x] Update chrome_options.binary_location to use detected browser
+- [x] Test on Linux with Brave/Chrome
+- [x] **COMMIT**: `feat: smart cross-platform browser detection with default browser priority`
 
 ## Phase 4: Fix Booking Script
 
@@ -190,6 +190,6 @@
 
 ## Current Status
 
-**Phase**: 3.1 - Update Selenium driver management (COMPLETE)  
-**Last Commit**: Ready to commit Phase 3.1  
-**Next Step**: Commit Phase 3.1, then start Phase 3.2 (smart browser detection)
+**Phase**: 3.2 - Implement smart browser detection (COMPLETE)  
+**Last Commit**: Ready to commit Phase 3.2  
+**Next Step**: Commit Phase 3.2, then start Phase 4.1 (fix booking script date picker)
