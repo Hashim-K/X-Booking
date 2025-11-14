@@ -228,45 +228,60 @@ def login_x(target_date, desired_times, retry_interval):
             print("Navigating to x.tudelft.nl...")
             driver.get('https://x.tudelft.nl')
 
-            # Wait for and click the TU Delft button
-            print("Waiting for TU Delft button...")
+            # Wait for page to load
             wait = WebDriverWait(driver, 20)
+            time.sleep(2)  # Give the page time to load and check authentication
+            
+            # Check if already logged in by looking for authentication data in localStorage
             try:
-                tu_delft_button = wait.until(EC.element_to_be_clickable(
-                    (By.CSS_SELECTOR, "button[data-test-id='oidc-login-button']")))
-                print("Found TU Delft button")
-                tu_delft_button.click()
-                print("Clicked TU Delft button")
+                auth_data = driver.execute_script(
+                    "return localStorage.getItem('delcom_auth');"
+                )
+                if auth_data:
+                    print("Already logged in! Skipping login flow.")
+                else:
+                    print("Not logged in, proceeding with login flow...")
+                    # Wait for and click the TU Delft button
+                    print("Waiting for TU Delft button...")
+                    try:
+                        tu_delft_button = wait.until(EC.element_to_be_clickable(
+                            (By.CSS_SELECTOR, "button[data-test-id='oidc-login-button']")))
+                        print("Found TU Delft button")
+                        tu_delft_button.click()
+                        print("Clicked TU Delft button")
+                    except Exception as e:
+                        print(f"Error with TU Delft button: {str(e)}")
+                        # Let's try to print the page source to see what's actually there
+                        print("Current page HTML:")
+                        # Print first 500 chars of page source
+                        print(driver.page_source[:500])
+                        raise  # Re-raise the exception to trigger our retry logic
+
+                    # Select "Delft University of Technology" account
+                    tu_delft_account = wait.until(EC.element_to_be_clickable(
+                        (By.CSS_SELECTOR, "div[data-title='Delft University of Technology']")))
+                    tu_delft_account.click()
+                    print("Clicked TU Delft account")
+                    # Wait for login elements and login
+                    username_field = wait.until(
+                        EC.presence_of_element_located((By.ID, 'username')))
+                    password_field = driver.find_element(By.ID, 'password')
+
+                    username_field.send_keys(username)
+                    password_field.send_keys(password)
+                    print("Sent username and password")
+                    # Find and click login button
+                    login_button = driver.find_element(By.ID, 'submit_button')
+                    login_button.click()
+                    print("Clicked login button")
+
+                    # Wait for redirect to x.tudelft.nl after login
+                    print("Waiting for redirect to x.tudelft.nl...")
+                    wait.until(lambda d: 'x.tudelft.nl' in d.current_url)
+                    print(f"Redirected to: {driver.current_url}")
             except Exception as e:
-                print(f"Error with TU Delft button: {str(e)}")
-                # Let's try to print the page source to see what's actually there
-                print("Current page HTML:")
-                # Print first 500 chars of page source
-                print(driver.page_source[:500])
-                raise  # Re-raise the exception to trigger our retry logic
-
-            # Select "Delft University of Technology" account
-            tu_delft_account = wait.until(EC.element_to_be_clickable(
-                (By.CSS_SELECTOR, "div[data-title='Delft University of Technology']")))
-            tu_delft_account.click()
-            print("Clicked TU Delft account")
-            # Wait for login elements and login
-            username_field = wait.until(
-                EC.presence_of_element_located((By.ID, 'username')))
-            password_field = driver.find_element(By.ID, 'password')
-
-            username_field.send_keys(username)
-            password_field.send_keys(password)
-            print("Sent username and password")
-            # Find and click login button
-            login_button = driver.find_element(By.ID, 'submit_button')
-            login_button.click()
-            print("Clicked login button")
-
-            # Wait for redirect to x.tudelft.nl after login
-            print("Waiting for redirect to x.tudelft.nl...")
-            wait.until(lambda d: 'x.tudelft.nl' in d.current_url)
-            print(f"Redirected to: {driver.current_url}")
+                print(f"Error checking/performing login: {str(e)}")
+                raise
 
             # Wait for date picker to be present and interactable
             # Updated selector to match the actual form control

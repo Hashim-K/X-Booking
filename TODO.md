@@ -71,6 +71,10 @@
 - [x] Add current URL logging on error
 - [x] Test: Run booking script and verify error logs
 - [x] **COMMIT**: `fix: update date picker selector and add comprehensive error handling`
+- [x] Add authentication check to skip login if already logged in
+- [x] Check localStorage for delcom_auth to detect existing session
+- [x] Test: Verify script works with and without existing session
+- [x] **COMMIT**: `fix: skip login flow when user is already authenticated`
 
 ### 4.2: Extend booking capabilities for X1 & X3
 
