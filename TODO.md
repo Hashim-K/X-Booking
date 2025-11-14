@@ -40,12 +40,12 @@
 
 ### 3.1: Update Selenium driver management
 
-- [ ] Remove webdriver-manager from pyproject.toml
-- [ ] Remove import for webdriver_manager in main.py
-- [ ] Update driver initialization to use `webdriver.Chrome(options=chrome_options)`
-- [ ] Run `poetry lock` and `poetry install`
-- [ ] Test: Verify automatic ChromeDriver download works
-- [ ] **COMMIT**: `feat: use Selenium 4.6+ automatic driver management`
+- [x] Remove webdriver-manager from pyproject.toml
+- [x] Remove import for webdriver_manager in main.py
+- [x] Update driver initialization to use `webdriver.Chrome(options=chrome_options)`
+- [x] Run `poetry lock` and `poetry install`
+- [x] Test: Verify automatic ChromeDriver download works
+- [x] **COMMIT**: `feat: use Selenium 4.6+ automatic driver management`
 
 ### 3.2: Implement smart browser detection
 
@@ -190,6 +190,6 @@
 
 ## Current Status
 
-**Phase**: 2.1 - Replace react-beautiful-dnd with @dnd-kit (COMPLETE)  
-**Last Commit**: Ready to commit Phase 2.1  
-**Next Step**: Commit Phase 2.1, then start Phase 3.1 (Selenium driver management)
+**Phase**: 3.1 - Update Selenium driver management (COMPLETE)  
+**Last Commit**: Ready to commit Phase 3.1  
+**Next Step**: Commit Phase 3.1, then start Phase 3.2 (smart browser detection)

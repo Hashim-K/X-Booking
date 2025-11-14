@@ -13,8 +13,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 import argparse
@@ -51,24 +49,18 @@ def login_x(target_date, desired_times, retry_interval):
     chrome_options.add_argument("--start-maximized")
     chrome_options.add_argument("--disable-gpu")  # Recommended for headless
 
-    # Initialize the webdriver with webdriver-manager
-    driver = webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()),
-        options=chrome_options
-    )
+    # Initialize the webdriver with Selenium 4.6+ automatic driver management
+    driver = webdriver.Chrome(options=chrome_options)
 
     while True:
         try:
             # If driver is not responding, restart it
             try:
                 driver.current_url
-            except:
+            except Exception:
                 print("Browser seems unresponsive, restarting...")
                 driver.quit()
-                driver = webdriver.Chrome(
-                    service=Service(ChromeDriverManager().install()),
-                    options=chrome_options
-                )
+                driver = webdriver.Chrome(options=chrome_options)
 
             # Navigate to the website
             print("Navigating to x.tudelft.nl...")
