@@ -200,16 +200,32 @@ def login_x(target_date, desired_times, retry_interval):
     if browser_binary:
         chrome_options.binary_location = browser_binary
     
+    # Essential arguments for headless mode stability
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--remote-debugging-port=9222")
-    # Add headless mode options
-    # new headless mode for Chrome v109+
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--disable-software-rasterizer")
+    chrome_options.add_argument("--disable-extensions")
+    chrome_options.add_argument("--disable-setuid-sandbox")
+    
+    # Headless mode configuration
     chrome_options.add_argument("--headless=new")
-    # Set a standard resolution
     chrome_options.add_argument("--window-size=1920,1080")
     chrome_options.add_argument("--start-maximized")
-    chrome_options.add_argument("--disable-gpu")  # Recommended for headless
+    
+    # Additional stability options
+    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+    chrome_options.add_argument("--no-first-run")
+    chrome_options.add_argument("--no-default-browser-check")
+    chrome_options.add_argument("--disable-background-timer-throttling")
+    chrome_options.add_argument("--disable-backgrounding-occluded-windows")
+    chrome_options.add_argument("--disable-renderer-backgrounding")
+    
+    # Set user agent to avoid detection
+    chrome_options.add_argument("--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+    
+    # Remote debugging (optional, can help with troubleshooting)
+    chrome_options.add_argument("--remote-debugging-port=9222")
 
     # Initialize the webdriver with Selenium 4.6+ automatic driver management
     driver = webdriver.Chrome(options=chrome_options)

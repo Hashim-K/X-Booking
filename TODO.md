@@ -78,6 +78,10 @@
 - [x] Improve success message verification with heading text check
 - [x] Verify both icon and "Booking was made" heading for confirmation
 - [x] **COMMIT**: `fix: enhance booking success verification with heading text check`
+- [x] Add additional Chrome options for headless mode stability
+- [x] Fix "session not created: unable to connect to renderer" error
+- [x] Add stability options: disable-blink-features, disable-software-rasterizer, etc.
+- [x] **COMMIT**: `fix: improve headless Chrome stability with additional options`
 
 ### 4.2: Extend booking capabilities for X1 & X3
 
@@ -198,5 +202,5 @@
 ## Current Status
 
 **Phase**: 4.1 - Update date picker selector and error handling (COMPLETE)  
-**Last Commit**: bc26d30 - fix: skip login flow when user is already authenticated  
+**Last Commit**: 7341c03 - fix: enhance booking success verification with heading text check  
 **Next Step**: Start Phase 4.2 (extend booking for X1 & X3)
