@@ -50,8 +50,8 @@ __pycache__/
 *$py.class
 poetry.lock
 
-# Bun
-bun.lockb
+# npm legacy - remove if exists
+package-lock.json
 
 # Debug files
 booking_error_*.png
