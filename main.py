@@ -401,13 +401,19 @@ def login_x(target_date, desired_times, retry_interval):
                         print("Clicked confirm button")
 
                         # Wait for and verify the booking success message
-                        # The success indicator is an icon element, so just checking its visibility is sufficient
+                        # Check for the success icon with data-test-id="booking-success"
                         try:
-                            success_element = wait.until(
+                            success_icon = wait.until(
                                 EC.visibility_of_element_located((By.XPATH, "//i[@data-test-id='booking-success']"))
                             )
-                            # If the success icon is visible, the booking succeeded
+                            
+                            # Also verify the heading text for extra confirmation
+                            success_heading = wait.until(
+                                EC.presence_of_element_located((By.XPATH, "//h4[contains(@class, 'text-success') and contains(text(), 'Booking was made')]"))
+                            )
+                            
                             print(f"✓ Successfully booked a slot for {desired_time}!")
+                            print("Booking confirmed: 'Booking was made' message displayed")
                             driver.quit()
                             return True
                         except TimeoutException:
