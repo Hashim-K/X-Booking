@@ -1,4 +1,4 @@
-# Fitness Slot Booking Automation
+# X Booking Automation
 
 An automated booking system for TU Delft X fitness slots with both a web-based React interface and a native Python GUI.
 
@@ -19,47 +19,55 @@ An automated booking system for TU Delft X fitness slots with both a web-based R
 - Chrome browser installed
 - TU Delft account credentials
 - Node.js and npm (for the React web app)
-- Conda (for managing Python dependencies)
+- Poetry (for managing Python dependencies)
 
 ## Setup Guide
 
-### 1. Conda Environment Setup
+### 1. Poetry Environment Setup
 
-**Important:** Set up the conda environment before proceeding with installation.
+**Important:** Install and configure Poetry before running the project.
 
 ```bash
-# Install Miniconda or Anaconda if you don't have it already
 # Verify installation
-conda --version
-
-# Create the environment
-conda create -n xscript python=3.9
-
-# Activate the environment
-conda activate xscript
+poetry --version
 ```
 
-You should see `(xscript)` at the beginning of your command prompt, indicating the environment is active.
-
-### 2. Installation
-
-With your conda environment activated:
+### 2. Clone the Repository
 
 ```bash
-# Clone the repository
 git clone https://github.com/omar-elamin/X-Script.git
 cd X-Script
+```
 
-# Install Python dependencies
-pip install -r requirements.txt
+### 3. Install Python Dependencies (with Poetry)
 
-# Install Node.js dependencies
+Poetry will automatically create a virtual environment for this project.
+
+```bash
+poetry install
+```
+
+If you want to enter the virtual environment manually:
+
+```bash
+poetry env activate
+```
+
+This will print a command (a path to an `activate` script). Then just run the printed command.
+
+### 4. Install Node.js Dependencies (for the React web app)
+
+```bash
 npm install
+```
 
-# Create a .env file with your credentials
-# Example:
-# TU_USERNAME=your_username
-# TU_PASSWORD=your_password
+### 5. Create a `.env` File
+
+Inside the project folder:
+
+```
+TU_USERNAME=your_username
+TU_PASSWORD=your_password
 ```
 
 ## Usage
@@ -67,19 +75,13 @@ npm install
 ### Option 1: Python Tkinter GUI
 
 ```bash
-# Make sure your conda environment is activated
-conda activate xscript
-
 # Run the Python application
-python main.py
+poetry run python main.py
 ```
 
 ### Option 2: React Web Application
 
 ```bash
-# Make sure your conda environment is activated
-conda activate xscript
-
 # Start the application (either method works)
 npm start -- -p 8008
 # OR
@@ -96,10 +98,7 @@ The `run.bat` script automates the process of starting the React web application
 - Installs npm dependencies if needed
 - Starts the Next.js application on port 8008
 
-**Important:** You must manually activate your conda environment first:
-
 ```bash
-conda activate xscript
 .\run.bat
 ```
 

@@ -3,7 +3,7 @@ import time
 from datetime import datetime
 import tkinter as tk
 from tkinter import ttk
-from tkcalendar import Calendar  # You'll need to add this to requirements.txt
+from tkcalendar import Calendar
 import subprocess
 import shutil
 import platform

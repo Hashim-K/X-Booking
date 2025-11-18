@@ -17,13 +17,16 @@ export default function Home() {
 
   const attemptBooking = async () => {
     try {
+      // Convert JS Date object to "YYYY-MM-DD" string
+      const formattedDate = selectedDate.toLocaleDateString("sv-SE"); 
+
       const response = await fetch('/api/book', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          date: selectedDate,
+          date: formattedDate,
           times: selectedTimes,
           interval: retryInterval,
           location: location,

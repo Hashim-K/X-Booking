@@ -1,5 +1,0 @@
-python-dotenv
-selenium
-webdriver-manager
-numpy
-tkcalendar

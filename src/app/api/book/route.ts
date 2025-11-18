@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     try {
       // Execute Python script with parameters
       ({ stdout, stderr } = await execPromise(
-        `python main.py --date "${formattedDate}" --times "${timesList}" --interval ${interval} --location ${bookingLocation}`
+        `poetry run python main.py --date "${formattedDate}" --times "${timesList}" --interval ${interval} --location ${bookingLocation}`
       ))
     }
     catch (error) {
