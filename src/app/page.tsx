@@ -89,7 +89,7 @@ export default function Home() {
           <div className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-lg font-semibold mb-4">Location</h2>
             <div className="flex gap-4">
-              {['Fitness', 'X1', 'X3'].map((loc) => (
+              {['Fitness', 'X1', 'X2', 'X3'].map((loc) => (
                 <label key={loc} className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="radio"
